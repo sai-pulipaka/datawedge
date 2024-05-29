@@ -2,7 +2,8 @@
 
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
-import { BrowserQRCodeReader } from "@zxing/browser";
+import { BarcodeFormat, BrowserMultiFormatReader } from "@zxing/browser";
+import { DecodeHintType } from "@zxing/library";
 
 export default function Home() {
   const [keypressoutput, setKeypressoutput] = useState<string>("");
@@ -24,12 +25,17 @@ export default function Home() {
   }, [keypressoutput]);
 
   async function startXZingScanner() {
-    const codeReader = new BrowserQRCodeReader();
+    const codeReader = new BrowserMultiFormatReader();
+    codeReader.hints.set(DecodeHintType.TRY_HARDER, true);
+    codeReader.hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.ITF]);
+    codeReader.hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.CODE_128]);
 
-    const videoInputDevices = await BrowserQRCodeReader.listVideoInputDevices();
+    const videoInputDevices =
+      await BrowserMultiFormatReader.listVideoInputDevices();
+    console.log({ videoInputDevices });
 
     // choose your media device (webcam, frontal camera, back camera, etc.)
-    const selectedDeviceId = videoInputDevices[0].deviceId;
+    const selectedDeviceId = videoInputDevices.at(-1)?.deviceId;
 
     console.log(`Started decode from camera with id ${selectedDeviceId}`);
 
@@ -42,7 +48,7 @@ export default function Home() {
       selectedDeviceId,
       previewElem,
       (result, error, controls) => {
-        console.log({ result, error, controls });
+        console.log({ result });
       }
     );
 
