@@ -28,7 +28,9 @@ export default function Home() {
     const codeReader = new BrowserMultiFormatReader();
     codeReader.hints.set(DecodeHintType.TRY_HARDER, true);
     codeReader.hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.ITF]);
-    codeReader.hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.CODE_128]);
+    codeReader.hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+      BarcodeFormat.CODE_128,
+    ]);
 
     const videoInputDevices =
       await BrowserMultiFormatReader.listVideoInputDevices();
@@ -47,8 +49,10 @@ export default function Home() {
     const controls = await codeReader.decodeFromVideoDevice(
       selectedDeviceId,
       previewElem,
-      (result, error, controls) => {
-        console.log({ result });
+      (result) => {
+        if (result !== undefined) {
+          setKeypressoutput(result.getText());
+        }
       }
     );
 
@@ -58,9 +62,9 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      {keypressoutput}
       <button onClick={startXZingScanner}>Start XZing Scanner</button>
       <video id="test-area-qr-code-webcam" style={{ width: "100%" }}></video>
+      {keypressoutput}
     </main>
   );
 }
