@@ -42,9 +42,7 @@ export default function Home() {
       selectedDeviceId,
       previewElem,
       (result, error, controls) => {
-        // use the result and error values to choose your actions
-        // you can also use controls API in this scope like the controls
-        // returned from the method.
+        console.log({ result, error, controls });
       }
     );
 
