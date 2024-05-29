@@ -13,7 +13,7 @@ export default function Home() {
         //  Enter key from DataWedge
         setKeypressoutput("");
       else {
-        setKeypressoutput(e.key);
+        setKeypressoutput(`${keypressoutput}${e.key}`);
       }
     }
     document.addEventListener("keypress", keypressHandler);
