@@ -51,7 +51,7 @@ export default function Home() {
       previewElem,
       (result, _, controls) => {
         if (result !== undefined) {
-          navigator.vibrate(200);
+          navigator.vibrate(1000);
           setKeypressoutput(result.getText());
           controls.stop();
         }
