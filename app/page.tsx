@@ -8,25 +8,17 @@ export default function Home() {
 
   useEffect(() => {
     function keypressHandler(e: any) {
-      console.log("pressed: " + e.key);
-      setKeypressoutput(`${keypressoutput}${e.key}`);
-    }
-
-    function keyupHandler(e: any) {
-      console.log("up: " + e.keyCode);
-    }
-    function keydownHandler(e: any) {
-      console.log("down: " + e.keyCode);
+      if (e.key === "$") {
+        setKeypressoutput("");
+      } else {
+        setKeypressoutput(`${keypressoutput}${e.key}`);
+      }
     }
 
     document.addEventListener("keypress", keypressHandler);
-    document.addEventListener("keyup", keyupHandler);
-    document.addEventListener("keydown", keydownHandler);
 
     return () => {
       document.removeEventListener("keypress", keypressHandler);
-      document.removeEventListener("keyup", keyupHandler);
-      document.removeEventListener("keydown", keydownHandler);
     };
   }, [keypressoutput]);
 
