@@ -62,7 +62,7 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <button onClick={startXZingScanner}>Start XZing Scanner</button>
+      <button onClick={startXZingScanner}>Start Scanner</button>
       <video id="test-area-qr-code-webcam" style={{ width: "100%" }}></video>
       {keypressoutput}
     </main>
