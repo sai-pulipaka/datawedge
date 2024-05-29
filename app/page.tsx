@@ -8,13 +8,8 @@ export default function Home() {
 
   useEffect(() => {
     function keypressHandler(e: any) {
-      console.log("pressed: " + e.keyCode);
-      if (e.keyCode == 13)
-        //  Enter key from DataWedge
-        setKeypressoutput("");
-      else {
-        setKeypressoutput(`${keypressoutput}${e.key}`);
-      }
+      console.log("pressed: " + e.key);
+      setKeypressoutput(`${keypressoutput}${e.key}`);
     }
 
     function keyupHandler(e: any) {
