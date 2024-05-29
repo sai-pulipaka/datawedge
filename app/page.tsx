@@ -49,9 +49,11 @@ export default function Home() {
     const controls = await codeReader.decodeFromVideoDevice(
       selectedDeviceId,
       previewElem,
-      (result) => {
+      (result, _, controls) => {
         if (result !== undefined) {
+          navigator.vibrate(200);
           setKeypressoutput(result.getText());
+          controls.stop();
         }
       }
     );
