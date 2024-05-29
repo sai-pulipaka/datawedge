@@ -11,9 +11,9 @@ export default function Home() {
       console.log("pressed: " + e.keyCode);
       if (e.keyCode == 13)
         //  Enter key from DataWedge
-        setKeypressoutput("enter");
+        setKeypressoutput("");
       else {
-        setKeypressoutput(`${keypressoutput}${e.key}`);
+        setKeypressoutput(e.key);
       }
     }
     document.addEventListener("keypress", keypressHandler);
