@@ -16,10 +16,22 @@ export default function Home() {
         setKeypressoutput(`${keypressoutput}${e.key}`);
       }
     }
+
+    function keyupHandler(e: any) {
+      console.log("up: " + e.keyCode);
+    }
+    function keydownHandler(e: any) {
+      console.log("down: " + e.keyCode);
+    }
+
     document.addEventListener("keypress", keypressHandler);
+    document.addEventListener("keyup", keyupHandler);
+    document.addEventListener("keydown", keydownHandler);
 
     return () => {
       document.removeEventListener("keypress", keypressHandler);
+      document.removeEventListener("keyup", keyupHandler);
+      document.removeEventListener("keydown", keydownHandler);
     };
   }, [keypressoutput]);
 
