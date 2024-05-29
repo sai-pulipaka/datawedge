@@ -2,6 +2,7 @@
 
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
+import { BrowserQRCodeReader } from "@zxing/browser";
 
 export default function Home() {
   const [keypressoutput, setKeypressoutput] = useState<string>("");
@@ -22,5 +23,40 @@ export default function Home() {
     };
   }, [keypressoutput]);
 
-  return <main className={styles.main}>{keypressoutput}</main>;
+  async function startXZingScanner() {
+    const codeReader = new BrowserQRCodeReader();
+
+    const videoInputDevices = await BrowserQRCodeReader.listVideoInputDevices();
+
+    // choose your media device (webcam, frontal camera, back camera, etc.)
+    const selectedDeviceId = videoInputDevices[0].deviceId;
+
+    console.log(`Started decode from camera with id ${selectedDeviceId}`);
+
+    const previewElem = document.querySelector(
+      "#test-area-qr-code-webcam"
+    ) as HTMLVideoElement;
+
+    // you can use the controls to stop() the scan or switchTorch() if available
+    const controls = await codeReader.decodeFromVideoDevice(
+      selectedDeviceId,
+      previewElem,
+      (result, error, controls) => {
+        // use the result and error values to choose your actions
+        // you can also use controls API in this scope like the controls
+        // returned from the method.
+      }
+    );
+
+    // stops scanning after 20 seconds
+    setTimeout(() => controls.stop(), 20000);
+  }
+
+  return (
+    <main className={styles.main}>
+      {keypressoutput}
+      <button onClick={startXZingScanner}>Start XZing Scanner</button>
+      <video id="test-area-qr-code-webcam" style={{ width: "100%" }}></video>
+    </main>
+  );
 }
