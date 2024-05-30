@@ -4,16 +4,23 @@ import styles from "./page.module.css";
 import { useEffect, useState } from "react";
 import { BarcodeFormat, BrowserMultiFormatReader } from "@zxing/browser";
 import { DecodeHintType } from "@zxing/library";
-import { Html5QrcodeResult, Html5QrcodeScanner } from "html5-qrcode";
+import {
+  Html5Qrcode,
+  Html5QrcodeResult,
+} from "html5-qrcode";
 import { Html5QrcodeError } from "html5-qrcode/esm/core";
 
 export default function Home() {
   const [keypressoutput, setKeypressoutput] = useState<string>("");
+  const [html5QrCode, setHtml5QrCode] = useState<Html5Qrcode | null>(null);
 
   useEffect(() => {
     function keypressHandler(e: KeyboardEvent) {
-      // only run this for ASCII characters from 31 to 126
-      console.log({ code: e });
+      // code is empty for TC78 DataWedge keypresses events
+      if (e.code !== "") {
+        return;
+      }
+
       if (e.key === "$") {
         setKeypressoutput("");
       } else {
@@ -73,32 +80,68 @@ export default function Home() {
     ) {
       // handle the scanned code as you like, for example:
       alert(decodedText);
+      navigator.vibrate(300);
     }
 
-    function onScanFailure(errorMessage: string, error: Html5QrcodeError) {
-      // handle scan failure, usually better to ignore and keep scanning.
-      // for example:
-      console.warn(`Code scan error = ${errorMessage}`);
-    }
+    // handle scan failure, usually better to ignore and keep scanning.
+    function onScanFailure(errorMessage: string, error: Html5QrcodeError) {}
 
-    let html5QrcodeScanner = new Html5QrcodeScanner(
-      "reader",
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      /* verbose= */ false
-    );
+    // let html5QrcodeScanner = new Html5QrcodeScanner(
+    //   "reader",
+    //   { fps: 10, qrbox: { width: 250, height: 250 } },
+    //   /* verbose= */ false
+    // );
 
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    // html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
     return () => {
-      html5QrcodeScanner.clear();
+      // html5QrcodeScanner.clear();
     };
   }, []);
 
+  function startCameraScan(): void {
+    const html5QrCode = new Html5Qrcode("reader");
+    setHtml5QrCode(html5QrCode);
+    const qrCodeSuccessCallback = (
+      decodedText: string
+      // decodedResult: Html5QrcodeResult
+    ) => {
+      setTimeout(() => {
+        alert(decodedText);
+      }, 100);
+      navigator.vibrate(250);
+      html5QrCode.stop();
+      html5QrCode.clear();
+    };
+    const config = { fps: 10 };
+
+    // If you want to prefer back camera
+    html5QrCode.start(
+      { facingMode: "environment" },
+      config,
+      qrCodeSuccessCallback,
+      () => {}
+    );
+  }
+
   return (
     <main className={styles.main}>
-      {/* <button onClick={startXZingScanner}>Start Scanner</button> */}
       <div id="reader"></div>
-      {keypressoutput}
+      <button className={styles.button} onClick={startCameraScan}>
+        Start Camera Scan
+      </button>
+      <button
+        className={styles.button}
+        onClick={() => {
+          if (html5QrCode) {
+            html5QrCode.stop();
+            html5QrCode.clear();
+          }
+        }}
+      >
+        Stop Camera Scan
+      </button>
+      <p>{keypressoutput}</p>
     </main>
   );
 }
