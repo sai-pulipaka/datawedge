@@ -13,7 +13,7 @@ export default function Home() {
   useEffect(() => {
     function keypressHandler(e: KeyboardEvent) {
       // only run this for ASCII characters from 31 to 126
-      console.log({ code: e.code });
+      console.log({ code: e });
       if (e.key === "$") {
         setKeypressoutput("");
       } else {
