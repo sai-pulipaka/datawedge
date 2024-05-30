@@ -1,12 +1,17 @@
 .mainContainer {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .cameraContainer {
-  height: min(500px, 50vh);
+  aspect-ratio: 4/3;
+  height: max(300px, 50vh);
   overflow: hidden;
   border-radius: 10px;
   border: 1px dashed;
+  max-width: 100%;
 }
 
 .cameraContainer video {

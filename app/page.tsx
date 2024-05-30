@@ -48,9 +48,8 @@ export default function Home() {
       // decodedResult: Html5QrcodeResult
     ) => {
       setCameraScanResult(decodedText);
+      html5QrCode.pause(true)
       navigator.vibrate(250);
-      await html5QrCode.stop();
-      html5QrCode.clear();
     };
     const config = {
       fps: 10,
@@ -91,6 +90,9 @@ export default function Home() {
             <AlertDialogCancel
               onClick={() => {
                 setCameraScanResult("");
+                if (html5QrCode) {
+                  html5QrCode.resume();
+                }
               }}
             >
               Close
