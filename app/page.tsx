@@ -70,7 +70,7 @@ export default function Home() {
       decodedResult: Html5QrcodeResult
     ) {
       // handle the scanned code as you like, for example:
-     alert(decodedText);
+      alert(decodedText);
     }
 
     function onScanFailure(errorMessage: string, error: Html5QrcodeError) {
@@ -85,7 +85,6 @@ export default function Home() {
       /* verbose= */ false
     );
 
-    console.log({html5QrcodeScanner})
     html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
     return () => {
@@ -97,7 +96,7 @@ export default function Home() {
     <main className={styles.main}>
       {/* <button onClick={startXZingScanner}>Start Scanner</button> */}
       <div id="reader"></div>
-      {/* {keypressoutput} */}
+      {keypressoutput}
     </main>
   );
 }
