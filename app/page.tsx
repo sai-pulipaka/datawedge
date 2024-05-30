@@ -4,6 +4,8 @@ import styles from "./page.module.css";
 import { useEffect, useState } from "react";
 import { BarcodeFormat, BrowserMultiFormatReader } from "@zxing/browser";
 import { DecodeHintType } from "@zxing/library";
+import { Html5QrcodeResult, Html5QrcodeScanner } from "html5-qrcode";
+import { Html5QrcodeError } from "html5-qrcode/esm/core";
 
 export default function Home() {
   const [keypressoutput, setKeypressoutput] = useState<string>("");
@@ -62,11 +64,38 @@ export default function Home() {
     setTimeout(() => controls.stop(), 20000);
   }
 
+  useEffect(() => {
+    function onScanSuccess(
+      decodedText: string,
+      decodedResult: Html5QrcodeResult
+    ) {
+      // handle the scanned code as you like, for example:
+      console.log(`Code matched = ${decodedText}`, decodedResult);
+    }
+
+    function onScanFailure(errorMessage: string, error: Html5QrcodeError) {
+      // handle scan failure, usually better to ignore and keep scanning.
+      // for example:
+      console.warn(`Code scan error = ${errorMessage}`);
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader",
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      /* verbose= */ false
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+    return () => {
+      html5QrcodeScanner.clear();
+    };
+  }, []);
+
   return (
     <main className={styles.main}>
-      <button onClick={startXZingScanner}>Start Scanner</button>
-      <video id="test-area-qr-code-webcam" style={{ width: "100%" }}></video>
-      {keypressoutput}
+      {/* <button onClick={startXZingScanner}>Start Scanner</button> */}
+      <div id="reader" style={{ width: "100%" }}></div>
+      {/* {keypressoutput} */}
     </main>
   );
 }
