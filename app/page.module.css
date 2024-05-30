@@ -9,6 +9,11 @@
   border: 1px dashed;
 }
 
+.cameraContainer video {
+  object-fit: cover;
+  max-height: 100%;
+}
+
 .buttonContainer {
   display: flex;
   justify-content: center;

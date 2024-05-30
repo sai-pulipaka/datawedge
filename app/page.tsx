@@ -58,7 +58,7 @@ export default function Home() {
         console.log(viewfinderWidth, viewfinderHeight);
         return {
           width: Math.min(viewfinderWidth - 20, 400),
-          height: Math.min(viewfinderHeight - 20, 300),
+          height: Math.min(viewfinderHeight - 20, 200),
         };
       },
     };
