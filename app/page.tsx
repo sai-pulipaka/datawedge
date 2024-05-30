@@ -70,7 +70,7 @@ export default function Home() {
       decodedResult: Html5QrcodeResult
     ) {
       // handle the scanned code as you like, for example:
-      console.log(`Code matched = ${decodedText}`, decodedResult);
+     alert(decodedText);
     }
 
     function onScanFailure(errorMessage: string, error: Html5QrcodeError) {
@@ -84,6 +84,8 @@ export default function Home() {
       { fps: 10, qrbox: { width: 250, height: 250 } },
       /* verbose= */ false
     );
+
+    console.log({html5QrcodeScanner})
     html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
     return () => {
@@ -94,7 +96,7 @@ export default function Home() {
   return (
     <main className={styles.main}>
       {/* <button onClick={startXZingScanner}>Start Scanner</button> */}
-      <div id="reader" style={{ width: "100%" }}></div>
+      <div id="reader"></div>
       {/* {keypressoutput} */}
     </main>
   );
