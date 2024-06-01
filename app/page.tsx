@@ -2,7 +2,12 @@
 
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import {
+  Html5Qrcode,
+  Html5QrcodeCameraScanConfig,
+  Html5QrcodeResult,
+  Html5QrcodeSupportedFormats,
+} from "html5-qrcode";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -13,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import "barcode-detector/side-effects";
 
 export default function Home() {
   const [keypressoutput, setKeypressoutput] = useState<string>("");
@@ -41,20 +47,31 @@ export default function Home() {
   }, [keypressoutput]);
 
   function startCameraScan() {
-    const html5QrCode = new Html5Qrcode("reader");
+    const html5QrCode = new Html5Qrcode("reader", {
+      verbose: false,
+      useBarCodeDetectorIfSupported: true,
+    });
     setHtml5QrCode(html5QrCode);
     const qrCodeSuccessCallback = async (
-      decodedText: string
-      // decodedResult: Html5QrcodeResult
+      decodedText: string,
+      decodedResult: Html5QrcodeResult
     ) => {
-      setCameraScanResult(decodedText);
-      html5QrCode.pause(true)
-      navigator.vibrate(250);
+      setCameraScanResult(
+        decodedText +
+          " " +
+          decodedResult.result.debugData?.decoderName +
+          " " +
+          decodedResult.result.format?.formatName
+      );
+      console.log({ decodedResult });
+      html5QrCode.pause(true);
+      try {
+        navigator.vibrate(250);
+      } catch (error) {}
     };
-    const config = {
+    const config: Html5QrcodeCameraScanConfig = {
       fps: 10,
       qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
-        console.log(viewfinderWidth, viewfinderHeight);
         return {
           width: Math.min(viewfinderWidth - 20, 400),
           height: Math.min(viewfinderHeight - 20, 200),
