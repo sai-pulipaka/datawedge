@@ -53,7 +53,7 @@ export default function Home() {
     };
   }, [keypressoutput]);
 
-  async function startStream() {
+  async function startStream(): Promise<void> {
     if (videoRef.current !== null) {
       const videoElement = videoRef.current;
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -61,6 +61,15 @@ export default function Home() {
           facingMode: "environment",
         },
       });
+      const [videoTrack] = stream.getVideoTracks();
+      const capabilities = videoTrack.getCapabilities();
+      // @ts-ignore
+      if (capabilities.zoom) {
+        await videoTrack.applyConstraints({
+          // @ts-ignore
+          advanced: [{ zoom: capabilities.zoom.max }],
+        });
+      }
       videoElement.srcObject = stream;
       console.log("stream started");
       await videoRef.current.play();
@@ -72,28 +81,25 @@ export default function Home() {
     async function detectBarcode() {
       if (videoElement !== null) {
         const barcodes = await barcodeDetector.detect(videoElement);
+
         if (barcodes.length > 0) {
           videoElement.pause();
           setCameraScanResult(barcodes[0].rawValue);
         }
+
+        videoElement.requestVideoFrameCallback(detectBarcode);
       }
     }
 
     if (videoElement) {
-      videoElement.addEventListener("timeupdate", detectBarcode);
+      videoElement.requestVideoFrameCallback(detectBarcode);
     }
-
-    return () => {
-      if (videoElement) {
-        videoElement.removeEventListener("timeupdate", detectBarcode);
-      }
-    };
   }, []);
 
   return (
     <main className={styles.mainContainer}>
       <div className={styles.cameraContainer}>
-        <video id="stream" ref={videoRef} />
+        <video playsInline id="stream" ref={videoRef} />
       </div>
       <div className={styles.buttonContainer}>
         <Button variant="outline" onClick={startStream}>
