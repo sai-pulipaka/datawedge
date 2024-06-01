@@ -1,13 +1,7 @@
 "use client";
 
 import styles from "./page.module.css";
-import { useEffect, useState } from "react";
-import {
-  Html5Qrcode,
-  Html5QrcodeCameraScanConfig,
-  Html5QrcodeResult,
-  Html5QrcodeSupportedFormats,
-} from "html5-qrcode";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -18,12 +12,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import "barcode-detector/side-effects";
+import { BarcodeDetector as BarcodeDetectorWASM } from "barcode-detector/pure";
+
+function createBarcodeDetector() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  if ((window as any).BarcodeDetector) {
+    return new (window as any).BarcodeDetector();
+  } else {
+    return new BarcodeDetectorWASM();
+  }
+}
+
+const barcodeDetector = createBarcodeDetector();
 
 export default function Home() {
   const [keypressoutput, setKeypressoutput] = useState<string>("");
-  const [html5QrCode, setHtml5QrCode] = useState<Html5Qrcode | null>(null);
   const [cameraScanResult, setCameraScanResult] = useState<string>("");
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     function keypressHandler(e: KeyboardEvent) {
@@ -46,41 +53,50 @@ export default function Home() {
     };
   }, [keypressoutput]);
 
-  function startCameraScan() {
-    const html5QrCode = new Html5Qrcode("reader", {
-      verbose: false,
-      useBarCodeDetectorIfSupported: true,
-    });
-    setHtml5QrCode(html5QrCode);
-    const qrCodeSuccessCallback = async (
-      decodedText: string,
-      decodedResult: Html5QrcodeResult
-    ) => {
-      setCameraScanResult(decodedText);
-      console.log({ decodedResult });
-      html5QrCode.pause(true);
-      try {
-        navigator.vibrate(250);
-      } catch (error) {}
-    };
-    const config: Html5QrcodeCameraScanConfig = {
-      fps: 30,
-    };
-
-    // If you want to prefer back camera
-    html5QrCode.start(
-      { facingMode: "environment" },
-      config,
-      qrCodeSuccessCallback,
-      () => {}
-    );
+  async function startStream() {
+    if (videoRef.current !== null) {
+      const videoElement = videoRef.current;
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+        },
+      });
+      videoElement.srcObject = stream;
+      console.log("stream started");
+      await videoRef.current.play();
+    }
   }
+
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    async function detectBarcode() {
+      if (videoElement !== null) {
+        const barcodes = await barcodeDetector.detect(videoElement);
+        if (barcodes.length > 0) {
+          videoElement.pause();
+          setCameraScanResult(barcodes[0].rawValue);
+        }
+      }
+    }
+
+    if (videoElement) {
+      videoElement.addEventListener("timeupdate", detectBarcode);
+    }
+
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener("timeupdate", detectBarcode);
+      }
+    };
+  }, []);
 
   return (
     <main className={styles.mainContainer}>
-      <div id="reader" className={styles.cameraContainer}></div>
+      <div className={styles.cameraContainer}>
+        <video id="stream" ref={videoRef} />
+      </div>
       <div className={styles.buttonContainer}>
-        <Button variant="outline" onClick={startCameraScan}>
+        <Button variant="outline" onClick={startStream}>
           Start Camera Scan
         </Button>
       </div>
@@ -95,8 +111,8 @@ export default function Home() {
             <AlertDialogCancel
               onClick={() => {
                 setCameraScanResult("");
-                if (html5QrCode) {
-                  html5QrCode.resume();
+                if (videoRef.current !== null) {
+                  videoRef.current.play();
                 }
               }}
             >
