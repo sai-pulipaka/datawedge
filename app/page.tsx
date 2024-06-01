@@ -56,13 +56,7 @@ export default function Home() {
       decodedText: string,
       decodedResult: Html5QrcodeResult
     ) => {
-      setCameraScanResult(
-        decodedText +
-          " " +
-          decodedResult.result.debugData?.decoderName +
-          " " +
-          decodedResult.result.format?.formatName
-      );
+      setCameraScanResult(decodedText);
       console.log({ decodedResult });
       html5QrCode.pause(true);
       try {
@@ -70,13 +64,7 @@ export default function Home() {
       } catch (error) {}
     };
     const config: Html5QrcodeCameraScanConfig = {
-      fps: 10,
-      qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
-        return {
-          width: Math.min(viewfinderWidth - 20, 400),
-          height: Math.min(viewfinderHeight - 20, 200),
-        };
-      },
+      fps: 30,
     };
 
     // If you want to prefer back camera
