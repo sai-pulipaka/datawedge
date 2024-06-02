@@ -21,18 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { BarcodeDetector as BarcodeDetectorWASM } from "barcode-detector/pure";
 
-function createBarcodeDetector(): BarcodeDetectorWASM {
-  if (typeof window === "undefined") {
-    return new BarcodeDetectorWASM();
-  }
-  if ((window as any).BarcodeDetector) {
-    return new (window as any).BarcodeDetector();
-  } else {
-    return new BarcodeDetectorWASM();
-  }
-}
-
-const barcodeDetector = createBarcodeDetector();
+const barcodeDetector = new BarcodeDetectorWASM({ formats: ["itf"] });
 
 type ScanningResult = {
   barcode: string;
