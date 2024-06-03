@@ -70,7 +70,7 @@ export default function Home() {
       if (capabilities.zoom) {
         await videoTrack.applyConstraints({
           // @ts-ignore
-          advanced: [{ zoom: capabilities.zoom.max / 4 }],
+          advanced: [{ zoom: capabilities.zoom.max }],
         });
       }
       videoElement.srcObject = stream;
