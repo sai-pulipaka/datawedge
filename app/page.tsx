@@ -32,6 +32,7 @@ export default function Home() {
   const [keypressoutput, setKeypressoutput] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [scanningResults, setScanningResults] = useState<ScanningResult[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     function keypressHandler(e: KeyboardEvent) {
@@ -85,6 +86,12 @@ export default function Home() {
   useEffect(() => {
     const videoElement = videoRef.current;
     async function detectBarcode() {
+      // clear the canvas
+      const canvas = canvasRef.current;
+      let canvasContext = canvas?.getContext("2d");
+      if (canvasContext && canvas) {
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+      }
       if (videoElement !== null) {
         const barcodes = await barcodeDetector.detect(videoElement);
 
@@ -108,6 +115,23 @@ export default function Home() {
               })),
             ];
           });
+
+          if (canvas) {
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            if (canvasContext) {
+              canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+              canvasContext.strokeStyle = "red";
+              barcodes.forEach((barcode) => {
+                const { x, y, width, height } = barcode.boundingBox;
+                canvasContext.strokeRect(x, y, width, height);
+                // write the barcode value inside the bounding box
+                canvasContext.font = "16px Arial";
+                canvasContext.fillStyle = "red";
+                canvasContext.fillText(barcode.rawValue, x, y - 10);
+              });
+            }
+          }
         }
 
         videoElement.requestVideoFrameCallback(detectBarcode);
@@ -123,6 +147,7 @@ export default function Home() {
     <main className={styles.mainContainer}>
       <div className={styles.cameraContainer}>
         <video playsInline id="stream" ref={videoRef} />
+        <canvas ref={canvasRef} id="canvas" />
       </div>
       <div className={styles.resultContainer}>
         <div className="my-6 w-full overflow-y-auto">
@@ -138,7 +163,7 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {scanningResults.map((result) => {
+              {Array.from(new Set(scanningResults)).map((result) => {
                 return (
                   <tr
                     key={result.barcode}
