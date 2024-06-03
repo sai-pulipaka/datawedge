@@ -67,12 +67,12 @@ export default function Home() {
       const [videoTrack] = stream.getVideoTracks();
       const capabilities = videoTrack.getCapabilities();
       // @ts-ignore
-      if (capabilities.zoom) {
-        await videoTrack.applyConstraints({
-          // @ts-ignore
-          advanced: [{ zoom: capabilities.zoom.max }],
-        });
-      }
+      // if (capabilities.zoom) {
+      //   await videoTrack.applyConstraints({
+      //     // @ts-ignore
+      //     advanced: [{ zoom: capabilities.zoom.max }],
+      //   });
+      // }
       videoElement.srcObject = stream;
       await videoRef.current.play();
     }
