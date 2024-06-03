@@ -134,7 +134,6 @@ export default function Home() {
 
     if (!overlayElement) return;
 
-    let imageElementScale = 1;
     let start: any = {};
 
     overlayElement.addEventListener("touchstart", (event) => {
@@ -163,15 +162,16 @@ export default function Home() {
           const deltaDistance = distance(event);
           scale = deltaDistance / start.distance;
         }
-        imageElementScale = Math.min(Math.max(1, scale), 4);
+     
+        console.log({ scale });
 
         // Calculate how much the fingers have moved on the X and Y axis
-        const deltaX =
-          ((event.touches[0].pageX + event.touches[1].pageX) / 2 - start.x) * 2; // x2 for accelarated movement
-        const deltaY =
-          ((event.touches[0].pageY + event.touches[1].pageY) / 2 - start.y) * 2; // x2 for accelarated movement
+        // const deltaX =
+        //   ((event.touches[0].pageX + event.touches[1].pageX) / 2 - start.x) * 2; // x2 for accelarated movement
+        // const deltaY =
+        //   ((event.touches[0].pageY + event.touches[1].pageY) / 2 - start.y) * 2; // x2 for accelarated movement
 
-        console.log({ deltaX, deltaY });
+        // console.log({ deltaX, deltaY });
       }
     });
   }, []);
