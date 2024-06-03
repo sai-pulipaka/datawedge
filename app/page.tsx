@@ -97,7 +97,7 @@ export default function Home() {
                 !previosResults.some(
                   (previousResult) =>
                     previousResult.barcode === barcode.rawValue
-                )
+                ) && barcode.rawValue.length === 10
             );
             return [
               ...previosResults,
