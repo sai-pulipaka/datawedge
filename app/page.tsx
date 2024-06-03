@@ -32,6 +32,7 @@ export default function Home() {
   const [keypressoutput, setKeypressoutput] = useState<string>("");
   const [cameraScanResult, setCameraScanResult] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
   const [scanningResults, setScanningResults] = useState<ScanningResult[]>([]);
 
   useEffect(() => {
@@ -91,7 +92,6 @@ export default function Home() {
         const barcodes = await barcodeDetector.detect(videoElement);
 
         if (barcodes.length > 0) {
-          console.log(barcodes);
           // setCameraScanResult(barcodes[0].rawValue);
           setScanningResults((previosResults) => {
             // if barocodes are not present in the previous results, add them
@@ -121,12 +121,68 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    // setup pinch detection on overlay container
+    const overlayElement = overlayRef.current;
+    // Calculate distance between two fingers
+    const distance = (event: TouchEvent) => {
+      return Math.hypot(
+        event.touches[0].pageX - event.touches[1].pageX,
+        event.touches[0].pageY - event.touches[1].pageY
+      );
+    };
+
+    if (!overlayElement) return;
+
+    let imageElementScale = 1;
+    let start: any = {};
+
+    overlayElement.addEventListener("touchstart", (event) => {
+      // console.log('touchstart', event);
+      if (event.touches.length === 2) {
+        event.preventDefault(); // Prevent page scroll
+
+        // Calculate where the fingers have started on the X and Y axis
+        start.x = (event.touches[0].pageX + event.touches[1].pageX) / 2;
+        start.y = (event.touches[0].pageY + event.touches[1].pageY) / 2;
+        start.distance = distance(event);
+      }
+    });
+
+    overlayElement.addEventListener("touchmove", (event) => {
+      // console.log('touchmove', event);
+      if (event.touches.length === 2) {
+        event.preventDefault(); // Prevent page scroll
+
+        // Safari provides event.scale as two fingers move on the screen
+        // For other browsers just calculate the scale manually
+        let scale;
+        if ((event as any).scale) {
+          scale = (event as any).scale;
+        } else {
+          const deltaDistance = distance(event);
+          scale = deltaDistance / start.distance;
+        }
+        imageElementScale = Math.min(Math.max(1, scale), 4);
+
+        // Calculate how much the fingers have moved on the X and Y axis
+        const deltaX =
+          ((event.touches[0].pageX + event.touches[1].pageX) / 2 - start.x) * 2; // x2 for accelarated movement
+        const deltaY =
+          ((event.touches[0].pageY + event.touches[1].pageY) / 2 - start.y) * 2; // x2 for accelarated movement
+
+        console.log({ deltaX, deltaY });
+      }
+    });
+  }, []);
+
   return (
     <main className={styles.mainContainer}>
       <div className={styles.cameraContainer}>
         <video playsInline id="stream" ref={videoRef} />
+        <div className={styles.overlayContainer}></div>
       </div>
-      <div className={styles.resultContainer}>
+      <div ref={overlayRef} className={styles.resultContainer}>
         <div className="my-6 w-full overflow-y-auto">
           <table className="w-full">
             <thead>
