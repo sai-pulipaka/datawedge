@@ -94,10 +94,11 @@ export default function Home() {
             // if barocodes are not present in the previous results, add them
             const newResults = barcodes.filter(
               (barcode) =>
+                barcode.rawValue.length === 10 &&
                 !previosResults.some(
                   (previousResult) =>
                     previousResult.barcode === barcode.rawValue
-                ) && barcode.rawValue.length === 10
+                )
             );
             return [
               ...previosResults,
@@ -117,7 +118,6 @@ export default function Home() {
       videoElement.requestVideoFrameCallback(detectBarcode);
     }
   }, []);
-
 
   return (
     <main className={styles.mainContainer}>
