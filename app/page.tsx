@@ -180,9 +180,9 @@ export default function Home() {
     <main className={styles.mainContainer}>
       <div className={styles.cameraContainer}>
         <video playsInline id="stream" ref={videoRef} />
-        <div className={styles.overlayContainer}></div>
+        <div ref={overlayRef} className={styles.overlayContainer}></div>
       </div>
-      <div ref={overlayRef} className={styles.resultContainer}>
+      <div className={styles.resultContainer}>
         <div className="my-6 w-full overflow-y-auto">
           <table className="w-full">
             <thead>
