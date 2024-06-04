@@ -185,8 +185,8 @@ export default function Home() {
                 canvasContext.fillText(barcode.rawValue, x, y - 10);
 
                 showTooltip({
-                  tooltipLeft: x,
-                  tooltipTop: y,
+                  tooltipLeft: y,
+                  tooltipTop: x,
                   tooltipData: barcode.rawValue,
                 });
               });
