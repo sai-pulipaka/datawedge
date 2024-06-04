@@ -19,7 +19,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { BarcodeDetector as BarcodeDetectorWASM } from "barcode-detector/pure";
+import {
+  BarcodeDetector as BarcodeDetectorWASM,
+  setZXingModuleOverrides,
+} from "barcode-detector/pure";
 import { beep } from "@/lib/beep";
 import { BaggageJourneyInfo } from "@/lib/types";
 import {
@@ -29,6 +32,12 @@ import {
   useTooltipInPortal,
   defaultStyles,
 } from "@visx/tooltip";
+
+setZXingModuleOverrides({
+  locateFile: () => {
+    return "/barcode_reader.wasm";
+  },
+});
 
 const barcodeDetector = new BarcodeDetectorWASM({ formats: ["itf"] });
 
@@ -46,7 +55,7 @@ const tooltipStyles = {
   width: 152,
   height: 72,
   padding: 12,
-  fontSize: 20
+  fontSize: 20,
 };
 
 export default function Home() {
@@ -60,8 +69,8 @@ export default function Home() {
     hideTooltip,
     tooltipOpen,
     tooltipData,
-    tooltipLeft = 0,
-    tooltipTop = 0,
+    tooltipLeft,
+    tooltipTop,
   } = useTooltip<TooltipData>();
 
   useEffect(() => {
@@ -173,20 +182,20 @@ export default function Home() {
             canvas.width = videoElement.videoWidth;
             canvas.height = videoElement.videoHeight;
             if (canvasContext) {
+              // clear the canvas
               canvasContext.clearRect(0, 0, canvas.width, canvas.height);
               canvasContext.strokeStyle = "red";
               canvasContext.lineWidth = 4;
               barcodes.forEach((barcode) => {
                 const { x, y, width, height } = barcode.boundingBox;
                 canvasContext.strokeRect(x, y, width, height);
-                // write the barcode value inside the bounding box
                 canvasContext.font = "16px Arial";
                 canvasContext.fillStyle = "red";
-                canvasContext.fillText(barcode.rawValue, x, y - 10);
+                canvasContext.fillText(barcode.rawValue, x, y);
 
                 showTooltip({
-                  tooltipLeft: y,
-                  tooltipTop: x,
+                  tooltipLeft: x,
+                  tooltipTop: y,
                   tooltipData: barcode.rawValue,
                 });
               });
@@ -252,7 +261,6 @@ export default function Home() {
         {tooltipData}
         <br />
         <br />
-        
       </TooltipWithBounds>
       {/* <div className={styles.buttonContainer}>
         <Button variant="outline" onClick={startStream}>
