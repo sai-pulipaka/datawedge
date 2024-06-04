@@ -20,6 +20,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { BarcodeDetector as BarcodeDetectorWASM } from "barcode-detector/pure";
+import { beep } from "@/lib/beep";
+import { BaggageJourneyInfo } from "@/lib/types";
+import {
+  Tooltip,
+  TooltipWithBounds,
+  useTooltip,
+  useTooltipInPortal,
+  defaultStyles,
+} from "@visx/tooltip";
 
 const barcodeDetector = new BarcodeDetectorWASM({ formats: ["itf"] });
 
@@ -28,11 +37,32 @@ type ScanningResult = {
   format: string;
 };
 
+type TooltipData = string;
+
+const tooltipStyles = {
+  ...defaultStyles,
+  backgroundColor: "rgba(53,71,125,0.8)",
+  color: "white",
+  width: 152,
+  height: 72,
+  padding: 12,
+  fontSize: 20
+};
+
 export default function Home() {
   const [keypressoutput, setKeypressoutput] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [scanningResults, setScanningResults] = useState<ScanningResult[]>([]);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const {
+    showTooltip,
+    hideTooltip,
+    tooltipOpen,
+    tooltipData,
+    tooltipLeft = 0,
+    tooltipTop = 0,
+  } = useTooltip<TooltipData>();
 
   useEffect(() => {
     function keypressHandler(e: KeyboardEvent) {
@@ -107,6 +137,29 @@ export default function Home() {
                     previousResult.barcode === barcode.rawValue
                 )
             );
+
+            if (newResults.length > 0) {
+              try {
+                navigator.vibrate(200);
+                // make a beep sound
+                beep();
+              } catch (error) {}
+            }
+
+            newResults.forEach((barcode) => {
+              fetch(
+                `https://apis.qa.alaskaair.com/aag/1/guestservices/baggagemanagement/baggagejourney/bags/${barcode.rawValue}`,
+                {
+                  headers: {
+                    "Ocp-Apim-Subscription-Key":
+                      "77916b3c9e2f4e2cbdec7c498ebf6fd9",
+                  },
+                }
+              )
+                .then((res) => res.json() as Promise<BaggageJourneyInfo[]>)
+                .then(console.log);
+            });
+
             return [
               ...previosResults,
               ...newResults.map((barcode) => ({
@@ -122,6 +175,7 @@ export default function Home() {
             if (canvasContext) {
               canvasContext.clearRect(0, 0, canvas.width, canvas.height);
               canvasContext.strokeStyle = "red";
+              canvasContext.lineWidth = 4;
               barcodes.forEach((barcode) => {
                 const { x, y, width, height } = barcode.boundingBox;
                 canvasContext.strokeRect(x, y, width, height);
@@ -129,6 +183,12 @@ export default function Home() {
                 canvasContext.font = "16px Arial";
                 canvasContext.fillStyle = "red";
                 canvasContext.fillText(barcode.rawValue, x, y - 10);
+
+                showTooltip({
+                  tooltipLeft: x,
+                  tooltipTop: y,
+                  tooltipData: barcode.rawValue,
+                });
               });
             }
           }
@@ -182,6 +242,18 @@ export default function Home() {
           </table>
         </div>
       </div>
+
+      <TooltipWithBounds
+        key={Math.random()} // needed for bounds to update correctly
+        left={tooltipLeft}
+        top={tooltipTop}
+        style={tooltipStyles}
+      >
+        {tooltipData}
+        <br />
+        <br />
+        
+      </TooltipWithBounds>
       {/* <div className={styles.buttonContainer}>
         <Button variant="outline" onClick={startStream}>
           Start Camera Scan
